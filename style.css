@@ -2,9 +2,38 @@
     display: grid;
     grid-template-columns: repeat(8, 60px);
     grid-template-rows: repeat(6, 60px);
+    background:white;
     gap: 2px;
 }
 
 .cell {
+    width: 60px;
+    height: 60px;
     border: 1px solid black;
+}
+.wall {
+    background: grey;
+}
+.goal {
+    background:yellow;
+}
+
+.container{
+    display: flex;
+    gap: 20px;
+
+}
+.child{
+    flex:1;
+}
+.button{
+    background: lightblue;
+    border-radius: 10px;
+    padding: 10px 20px;
+    border: 1px solid black;
+    cursor: pointer;
+}
+.text {
+    font-size: 20px;
+    margin: 0;
 }

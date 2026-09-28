@@ -1,11 +1,23 @@
 <!DOCTYPE html>
 <html>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="style.css">
     <head>
 
     </head>
     <body>
-        <div id="grid"></div>
+        <div class="container">
+            <div id="grid" class="child">
+                <div class="cell wall"></div>
+                <div class="cell goal"></div>
+            </div>
+            <div id="prog" class="child"></div>
+        </div>
+        <center>
+            <div class="container">
+                <button class="button child" onclick="cycleLevel()">Next Level</button>
+                <p class="text child" id="level">1</p>
+            </div>
+        </center>
     </body>
     <script src="script.js"></script>
 </html>
