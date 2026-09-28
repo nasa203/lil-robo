@@ -1,0 +1,10 @@
+#grid {
+    display: grid;
+    grid-template-columns: repeat(8, 60px);
+    grid-template-rows: repeat(6, 60px);
+    gap: 2px;
+}
+
+.cell {
+    border: 1px solid black;
+}
