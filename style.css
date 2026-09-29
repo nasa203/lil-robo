@@ -44,11 +44,10 @@ body {
 }
 .robot::after {
     content: "";
-    width: 0;
-    height: 0;
-    border-top: 18px solid transparent;
-    border-bottom: 18px solid transparent;
-    border-left: 30px solid red;
+    width: 36px;
+    height: 36px;
+    background: red;
+    clip-path: polygon(100% 50%, 0% 0%, 0% 100%);
 }
 .robot[data-dir="0"]::after {
     transform: rotate(0deg);
@@ -64,6 +63,18 @@ body {
 
 .robot[data-dir="3"]::after {
     transform: rotate(270deg);
+}
+
+.hit {
+    animation: hit 0.25s;
+}
+
+@keyframes hit {
+    0%   { transform: translateX(0); }
+    25%  { transform: translateX(-5px); }
+    50%  { transform: translateX(5px); }
+    75%  { transform: translateX(-4px); }
+    100% { transform: translateX(0); }
 }
 
 .container {
