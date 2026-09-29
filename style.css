@@ -10,6 +10,7 @@
     width: 60px;
     height: 60px;
     border: 1px solid black;
+    border-radius: 2px;
 }
 .wall {
     background: grey;
@@ -32,6 +33,10 @@
     padding: 10px 20px;
     border: 1px solid black;
     cursor: pointer;
+}
+.button:active {
+    background: darkblue;
+    border: 5px solid black;
 }
 .text {
     font-size: 20px;
