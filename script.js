@@ -20,10 +20,10 @@ const levelList = [
     ],
     [
         ["wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall"],
-        ["wall", "empty", "empty", "empty", "empty", "empty", "goal", "wall"],
+        ["wall", "empty", "wall", "empty", "empty", "empty", "goal", "wall"],
         ["wall", "empty", "empty", "empty", "wall", "empty", "empty", "wall"],
         ["wall", "empty", "empty", "empty", "wall", "empty", "empty", "wall"],
-        ["wall", "empty", "empty", "empty", "empty", "empty", "empty", "wall"],
+        ["wall", "empty", "empty", "empty", "wall", "empty", "empty", "wall"],
         ["wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall"]
     ]
 ];
@@ -71,10 +71,13 @@ async function runProgram() {
         robot.y = 4;
         robot.dir = 0;
         drawRobot();
-        const code = document.getElementById("code").value;
-        const commands = code.toLowerCase().replaceAll(" ", "");
+        await sleep(500)
+        const code = document.getElementById("code");
+        const commands = code.value.toLowerCase();
         console.log(commands);
         for (let i = 0; i < commands.length; i++) {
+            code.focus();
+            code.setSelectionRange(i, i + 1);
             if (commands[i] == "f") {
                 if (robot.dir === 0) {
                     robot.x += 1;
@@ -141,9 +144,19 @@ async function runProgram() {
                     robot.dir = 3;
                 }
             }
-            await sleep(500);
             drawRobot();
+            await sleep(500);
         }
+        const currentCell = grid.querySelector(
+                `[data-x="${robot.x}"][data-y="${robot.y}"]`
+            );
+            if (currentCell.classList.contains("goal")) {
+                currentCell.classList.add("complete");
+                await sleep(700);
+                cycleLevel();
+                running = false;
+                return;
+            }
         running = false;
     }
 }
