@@ -37,6 +37,34 @@ body {
 .goal {
     background:yellow;
 }
+.robot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.robot::after {
+    content: "";
+    width: 0;
+    height: 0;
+    border-top: 18px solid transparent;
+    border-bottom: 18px solid transparent;
+    border-left: 30px solid red;
+}
+.robot[data-dir="0"]::after {
+    transform: rotate(0deg);
+}
+
+.robot[data-dir="1"]::after {
+    transform: rotate(90deg);
+}
+
+.robot[data-dir="2"]::after {
+    transform: rotate(180deg);
+}
+
+.robot[data-dir="3"]::after {
+    transform: rotate(270deg);
+}
 
 .container {
     display: flex;
@@ -73,4 +101,19 @@ body {
 
     font-size: 18px;
     font-weight: bold;
+}
+
+#code {
+    width: 100%;
+    height: 300px;
+
+    resize: none;
+
+    font-family: monospace;
+    font-size: 20px;
+
+    padding: 15px;
+
+    border: 2px solid #888;
+    border-radius: 8px;
 }
