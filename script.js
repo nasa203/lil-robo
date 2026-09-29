@@ -18,17 +18,13 @@ drawLevel(levelList[0]);
 
 function drawLevel(level) {
     grid.innerHTML = "";
-
     for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {
             const cell = document.createElement("div");
-
             cell.classList.add("cell");
             cell.classList.add(level[y][x]);
-
             cell.dataset.x = x;
             cell.dataset.y = y;
-
             grid.appendChild(cell);
         }
     }
@@ -40,7 +36,8 @@ function drawLevel(level) {
 let level = 0;
 function cycleLevel(){
     level++;
-    if (level > 5) level = 0;
+    if (level >= levelList.length) level = 0;
+    document.getElementById("level").textContent = "Level " + (level + 1);
     drawLevel(levelList[level])
 }
 
