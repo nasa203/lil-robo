@@ -9,14 +9,14 @@ let running = false;
 let level = 0;
 const levelList = [
     {
-        width:5,
+        width:7,
         height:5,
         grid:[
-            ["wall", "wall", "wall", "wall", "wall"],
-            ["wall", "empty", "empty", "empty", "wall"],
-            ["wall", "empty", "wall", "goal", "wall"],
-            ["wall", "empty", "empty", "empty", "wall"],
-            ["wall", "wall", "wall", "wall", "wall"]
+            ["wall", "wall", "wall", "wall", "wall", "wall", "wall"],
+            ["wall", "empty", "empty", "empty", "empty", "empty", "wall"],
+            ["wall", "empty", "empty", "empty", "wall", "goal", "wall"],
+            ["wall", "empty", "empty", "empty", "empty", "empty", "wall"],
+            ["wall", "wall", "wall", "wall", "wall","wall","wall"]
         ],
         start:{
             x:1,
