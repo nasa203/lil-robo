@@ -1,43 +1,96 @@
 const grid = document.getElementById("grid");
-const width = 8;
-const height = 6;
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 let robot = {
     x: 1,
-    y: 4,
+    y: 2,
     dir: 0
 };
 let running = false;
 let level = 0;
 const levelList = [
-    [
-        ["wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall"],
-        ["wall", "empty", "empty", "empty", "empty", "empty", "goal", "wall"],
-        ["wall", "empty", "empty", "empty", "empty", "empty", "empty", "wall"],
-        ["wall", "empty", "empty", "empty", "empty", "empty", "empty", "wall"],
-        ["wall", "empty", "empty", "empty", "empty", "empty", "empty", "wall"],
-        ["wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall"]
-    ],
-    [
-        ["wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall"],
-        ["wall", "empty", "wall", "empty", "empty", "empty", "goal", "wall"],
-        ["wall", "empty", "empty", "empty", "wall", "empty", "empty", "wall"],
-        ["wall", "empty", "empty", "empty", "wall", "empty", "empty", "wall"],
-        ["wall", "empty", "empty", "empty", "wall", "empty", "empty", "wall"],
-        ["wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall"]
-    ]
-];
+    {
+        width:5,
+        height:5,
+        grid:[
+            ["wall", "wall", "wall", "wall", "wall"],
+            ["wall", "empty", "empty", "empty", "wall"],
+            ["wall", "empty", "wall", "goal", "wall"],
+            ["wall", "empty", "empty", "empty", "wall"],
+            ["wall", "wall", "wall", "wall", "wall"]
+        ],
+        start:{
+            x:1,
+            y:2,
+            dir:0
+        }
+    },
+    {
+        width: 8,
+        height: 6,
+        grid: [
+            ["wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall"],
+            ["wall", "empty", "empty", "empty", "empty", "empty", "goal", "wall"],
+            ["wall", "empty", "empty", "empty", "empty", "empty", "empty", "wall"],
+            ["wall", "empty", "empty", "empty", "empty", "empty", "empty", "wall"],
+            ["wall", "empty", "empty", "empty", "empty", "empty", "empty", "wall"],
+            ["wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall"]
+        ],
+        start: {
+            x: 1,
+            y: 4,
+            dir: 0
+        }
+    },
+    {
+        width: 8,
+        height: 6,
+        grid: [
+            ["wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall"],
+            ["wall", "empty", "wall", "empty", "empty", "empty", "goal", "wall"],
+            ["wall", "empty", "empty", "empty", "wall", "empty", "empty", "wall"],
+            ["wall", "empty", "empty", "empty", "wall", "empty", "empty", "wall"],
+            ["wall", "empty", "empty", "empty", "wall", "empty", "empty", "wall"],
+            ["wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall"]
+        ],
+        start: {
+            x: 1,
+            y: 4,
+            dir: 0
+        }
+    },
+    {
+        width: 10,
+        height: 7,
 
+        grid: [
+            ["wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall"],
+            ["wall", "empty", "empty", "empty", "empty", "empty", "empty", "empty", "goal", "wall"],
+            ["wall", "empty", "empty", "wall", "wall", "wall", "wall", "empty", "empty", "wall"],
+            ["wall", "empty", "empty", "empty", "empty", "empty", "empty", "empty", "empty", "wall"],
+            ["wall", "empty", "empty", "wall", "wall", "wall", "wall", "empty", "empty", "wall"],
+            ["wall", "empty", "empty", "empty", "empty", "empty", "empty", "empty", "empty", "wall"],
+            ["wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall"]
+        ],
+
+        start: {
+            x: 1,
+            y: 5,
+            dir: 0
+        }
+    },
+];
 drawLevel(levelList[0]);
-drawRobot();
+drawRobot(0);
 
 function drawLevel(level) {
     grid.innerHTML = "";
-    for (let y = 0; y < height; y++) {
-        for (let x = 0; x < width; x++) {
+    grid.style.gridTemplateColumns = `repeat(${level.width}, 60px)`;
+    grid.style.gridTemplateRows = `repeat(${level.height}, 60px)`;
+    for (let y = 0; y < level.height; y++) {
+        for (let x = 0; x < level.width; x++) {
             const cell = document.createElement("div");
             cell.classList.add("cell");
-            cell.classList.add(level[y][x]);
+            cell.classList.add(level.grid[y][x]);
             cell.dataset.x = x;
             cell.dataset.y = y;
             grid.appendChild(cell);
@@ -52,24 +105,25 @@ function cycleLevel() {
     }
     document.getElementById("level").textContent = "Level " + (level + 1);
     drawLevel(levelList[level]);
-    robot.x = 1;
-    robot.y = 4;
-    robot.dir = 0;
+    resetRobot();
     drawRobot();
 }
-function resetRobot(){
-    if (running) return;
-    robot.x = 1;
-    robot.y = 4;
-    robot.dir = 0;
+function resetRobot() {
+    const start = levelList[level].start;
+    robot.x = start.x;
+    robot.y = start.y;
+    robot.dir = start.dir;
+
     drawRobot();
+}
+function resetRobotExternal(){
+    if (running) return;
+    resetRobot();
 }
 async function runProgram() {
     if (!running){
         running = true;
-        robot.x = 1;
-        robot.y = 4;
-        robot.dir = 0;
+        resetRobot();
         drawRobot();
         await sleep(500)
         const code = document.getElementById("code");
