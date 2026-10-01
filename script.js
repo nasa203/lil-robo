@@ -117,8 +117,7 @@ function resetRobot() {
     drawRobot();
 }
 function resetRobotExternal(){
-    if (running) return;
-    resetRobot();
+    running = false;
 }
 async function runProgram() {
     if (!running){
@@ -129,7 +128,8 @@ async function runProgram() {
         const code = document.getElementById("code");
         const commands = code.value.toLowerCase();
         console.log(commands);
-        for (let i = 0; i < commands.length; i++) {
+        let i = 0;
+        while (!onTarget()&&running) {
             code.focus();
             code.setSelectionRange(i, i + 1);
             if (commands[i] == "f") {
@@ -199,22 +199,32 @@ async function runProgram() {
                 }
             }
             drawRobot();
+            i = (i + 1) % commands.length;
             await sleep(500);
         }
-        const currentCell = grid.querySelector(
+        if (running){
+            const currentCell = grid.querySelector(
                 `[data-x="${robot.x}"][data-y="${robot.y}"]`
             );
-            if (currentCell.classList.contains("goal")) {
-                currentCell.classList.add("complete");
-                await sleep(700);
-                cycleLevel();
-                running = false;
-                return;
-            }
-        running = false;
+            currentCell.classList.add("complete");
+            await sleep(700);
+            cycleLevel();
+            running = false;
+        } else {
+            resetRobot();
+        }
     }
 }
+function onTarget(){
+    const currentCell = grid.querySelector(
+        `[data-x="${robot.x}"][data-y="${robot.y}"]`
+    );
+    if (currentCell.classList.contains("goal")) {
+        return true;
 
+    }
+    return false;
+}
 function drawRobot() {
     const cells = grid.children;
     for (const cell of cells) {
