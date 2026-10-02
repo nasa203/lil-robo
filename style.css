@@ -303,6 +303,9 @@ body {
 .robot.fall::after {
     animation: fall .6s ease-in forwards;
 }
+.robot.snap::after {
+    transition: none;
+}
 @keyframes fall {
     to { transform: scale(0) rotate(540deg); opacity: 0; }
 }

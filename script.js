@@ -647,16 +647,24 @@ function onTarget(){
 }
 function drawRobot() {
     const cells = grid.children;
-    for (const cell of cells) {
-        cell.classList.remove("robot");
-    }
+    const prev = grid.querySelector(".robot");
     const cell = cellAt(robot.x, robot.y);
+    const moved = prev !== cell;
+
+    for (const c of grid.children) c.classList.remove("robot");
+
+    let turn = (robot.dir - lastDir + 4) % 4;
+    if (turn === 3) turn = -1;
+    robotAngle += turn * 90;
+    lastDir = robot.dir;
+
+    if (moved) cell.classList.add("snap");
+    cell.style.setProperty("--angle", robotAngle + "deg");
     cell.classList.add("robot");
     cell.dataset.dir = robot.dir;
 
-    let turn = (robot.dir - lastDir + 4) % 4;   
-    if (turn === 3) turn = -1;                  
-    robotAngle += turn * 90;
-    lastDir = robot.dir;
-    cell.style.setProperty("--angle", robotAngle + "deg");
+    if (moved) {
+        requestAnimationFrame(() =>
+            requestAnimationFrame(() => cell.classList.remove("snap")));
+    }
 }
