@@ -625,7 +625,10 @@ async function runProgram() {
         i = (i + 1) % commands.length;
         await sleep(STEP_MS);
     }
-    if (!alive()) return;
+    if (!alive()){
+        getElementById("code").focus();
+        return;
+    };
 
     const currentCell = cellAt(robot.x, robot.y);
     if (result === "goal") {
