@@ -60,25 +60,8 @@ const levelList = [
         height: 6,
         grid: [
             ["wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall"],
-            ["wall", "empty", "empty", "empty", "empty", "empty", "goal", "wall"],
-            ["wall", "empty", "empty", "empty", "empty", "empty", "empty", "wall"],
-            ["wall", "empty", "empty", "empty", "empty", "empty", "empty", "wall"],
-            ["wall", "empty", "empty", "empty", "empty", "empty", "empty", "wall"],
-            ["wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall"]
-        ],
-        start: {
-            x: 1,
-            y: 4,
-            dir: 0
-        }
-    },
-    {
-        width: 8,
-        height: 6,
-        grid: [
-            ["wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall"],
-            ["wall", "empty", "wall", "empty", "empty", "empty", "goal", "wall"],
-            ["wall", "empty", "empty", "empty", "wall", "empty", "empty", "wall"],
+            ["wall", "empty", "wall", "empty", "empty", "wall", "goal", "wall"],
+            ["wall", "ice", "ice", "ice", "ice", "ice", "ice", "wall"],
             ["wall", "empty", "empty", "empty", "wall", "empty", "empty", "wall"],
             ["wall", "empty", "empty", "empty", "wall", "empty", "empty", "wall"],
             ["wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall"]
@@ -213,9 +196,9 @@ const levelList = [
     fromMap([
         "##############",
         "#S..#a...X..b#",
-        "#.v.######.#.#",
-        "#.v......y.#.#",
-        "#.>>>>.#####.#",
+        "#.v.######.#v#",
+        "#.v......y.#v#",
+        "#.>>>>.#####v#",
         "#b..x....>>>v#",
         "#####.######v#",
         "#G..a.y.....<#",
@@ -291,7 +274,7 @@ const levelList = [
         "#.#a###.#G#..#",
         "#.#.....#D#>v#",
         "#.#####.#.#.v#",
-        "#b......y...<#",
+        "#a......y...<#",
         "##############"
     ]),
 ];
