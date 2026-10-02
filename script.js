@@ -1,7 +1,7 @@
 const grid = document.getElementById("grid");
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-const STEP_MS = 500;   // one command
-const SLIDE_MS = 160;  // one cell of ice / belt movement
+const STEP_MS = 500;   
+const SLIDE_MS = 160;  
 const DX = [1, 0, -1, 0];
 const DY = [0, 1, 0, -1];
 let robot = {
@@ -11,31 +11,40 @@ let robot = {
 };
 let running = false;
 let activeRun = 0;
-let tick = 0;        // world clock: advances once per program step
-let movers = [];      // live moving-wall positions
-let robotAngle = 0;   // cumulative rotation so turns always take the short way
+let tick = 0;        
+let movers = [];      
+let boxes = [];       
+let robotAngle = 0;   
 let lastDir = 0;
 let level = 0;
 
-// Map characters for compact level definitions (produces the same format as the hand-written levels)
+const value = window.location.hash.slice(1);
+if (value.length>0){
+    level = value;
+    document.getElementById("level").innerText = "level "+(Number(level)+1);
+}
+
 const TILES = {
     "#": "wall", ".": "empty", "S": "empty", "G": "goal",
     "~": "ice", "X": "pit", "K": "key", "D": "door",
     ">": "belt-0", "v": "belt-1", "<": "belt-2", "^": "belt-3",
     "R": "spin-r", "L": "spin-l", "a": "portal-a", "b": "portal-b",
-    "-": "track", "m": "track", "n": "track",   // m/n = moving wall starting horizontal/vertical
-    "x": "spike-0", "y": "spike-2"              // spikes: up 2 steps, down 2 steps (y is offset)
+    "-": "track", "m": "track", "n": "track",   
+    "x": "spike-0", "y": "spike-2",             
+    "B": "empty"                                
 };
 function fromMap(rows, dir = 0) {
     let start = null;
     const movers = [];
+    const boxes = [];
     const cells = rows.map((row, y) => [...row].map((ch, x) => {
         if (ch === "S") start = { x, y, dir };
         if (ch === "m") movers.push({ x, y, dir: 0 });
         if (ch === "n") movers.push({ x, y, dir: 1 });
+        if (ch === "B") boxes.push({ x, y });
         return TILES[ch];
     }));
-    return { width: rows[0].length, height: rows.length, grid: cells, start, movers };
+    return { width: rows[0].length, height: rows.length, grid: cells, start, movers, boxes };
 }
 
 const levelList = [
@@ -73,7 +82,7 @@ const levelList = [
         }
     },
 
-    // 4 — Ice: you slide until you hit something that isn't ice
+    
     fromMap([
         "########",
         "#S~~~~.#",
@@ -101,7 +110,7 @@ const levelList = [
             dir: 0
         }
     },
-    // 6 — Pits: falling in restarts the run
+    
     fromMap([
         "#########",
         "#S.XXXXX#",
@@ -111,7 +120,7 @@ const levelList = [
         "#XXXX.G.#",
         "#########"
     ]),
-    // 7 — Key & door: grab the key to open every door
+    
     fromMap([
         "##########",
         "#S...#..G#",
@@ -119,7 +128,7 @@ const levelList = [
         "#....#...#",
         "##########"
     ]),
-    // 8 — Conveyor belts 
+    
     fromMap([
         "###########",
         "#S........#",
@@ -128,7 +137,7 @@ const levelList = [
         "#G<<<<<<<.#",
         "###########"
     ]),
-    // 9 — Spinners turn you 
+    
     fromMap([
         "#########",
         "#S..R#RG#",
@@ -136,7 +145,7 @@ const levelList = [
         "####L.L##",
         "#########"
     ]),
-    // 10 — Portals
+    
     fromMap([
         "##########",
         "#S..a#..G#",
@@ -144,7 +153,7 @@ const levelList = [
         "#....#a..#",
         "##########"
     ]),
-    // 11 — Ice over pits
+    
     fromMap([
         "##########",
         "#S~~~.~~X#",
@@ -153,7 +162,7 @@ const levelList = [
         "#~~~~.~~G#",
         "##########"
     ]),
-    // 12 — Everything together
+    
     fromMap([
         "###########",
         "#S..a#a..K#",
@@ -161,7 +170,7 @@ const levelList = [
         "##.GD<<<<<#",
         "###########"
     ]),
-    // 13 — Spike Gallery
+    
     fromMap([
         "##############",
         "#S..x.y.x...K#",
@@ -171,7 +180,7 @@ const levelList = [
         "#...y.xD.....#",
         "##############"
     ]),
-    // 14 — Patrol
+    
     fromMap([
         "##############",
         "#S....-......#",
@@ -181,7 +190,7 @@ const levelList = [
         "#..<<<-....y.#",
         "##############"
     ]),
-    // 15 — Slippery Slope
+    
     fromMap([
         "##############",
         "#S~~~~~R~~~~.#",
@@ -193,7 +202,7 @@ const levelList = [
         "#G...y-..x...#",
         "##############"
     ]),
-    // 16 — Portal Maze
+    
     fromMap([
         "##############",
         "#S..#a...X..b#",
@@ -205,7 +214,7 @@ const levelList = [
         "#G..a.y.....<#",
         "##############"
     ]),
-    // 17 — Frozen Lake
+    
     fromMap([
         "##############",
         "#S~~~.~~~~#~a#",
@@ -217,7 +226,7 @@ const levelList = [
         "#a..y..x..y.G#",
         "##############"
     ]),
-    // 18 — Crossfire
+    
     fromMap([
         "##############",
         "#S.-.-.-.-..x#",
@@ -229,7 +238,7 @@ const levelList = [
         "#b..y.~~x...G#",
         "##############"
     ]),
-    // 19 — Conveyor Factory
+    
     fromMap([
         "##############",
         "#S>>>>v#K....#",
@@ -241,7 +250,7 @@ const levelList = [
         "#...y..x..<..#",
         "##############"
     ]),
-    // 20 — Clockwork
+    
     fromMap([
         "##############",
         "#S....R.....L#",
@@ -252,7 +261,7 @@ const levelList = [
         "#...#.-.....##",
         "##############"
     ]),
-    // 21 — Gauntlet
+    
     fromMap([
         "##############",
         "#S.x..y..x.K.#",
@@ -265,7 +274,7 @@ const levelList = [
         "#a....X......#",
         "##############"
     ]),
-    // 22 — Finale
+    
     fromMap([
         "##############",
         "#S~~~R#..x..K#",
@@ -277,9 +286,109 @@ const levelList = [
         "#.#####.#.#.v#",
         "#a......y...<#",
         "##############"
+    ]),    
+    fromMap([
+        "##########",
+        "#....#####",
+        "#S.B.X..G#",
+        "#....#####",
+        "##########"
+    ]),
+    
+    fromMap([
+        "############",
+        "#S.........#",
+        "#.B........#",
+        "#~~~~~~~~~X#",
+        "##########G#",
+        "############"
+    ]),
+    
+    fromMap([
+        "##############",
+        "#S...........#",
+        "#....B.......#",
+        "#####.########",
+        "#G.X<<<<<<<<.#",
+        "##############"
+    ]),
+    
+    fromMap([
+        "##############",
+        "#S...........#",
+        "#..B......B..#",
+        "#~~~~~~~~~~~~#",
+        "#~~~~~~~~~~~~#",
+        "#XXXXXXXXXXXX#",
+        "#G...........#",
+        "##############"
+    ]),
+    
+    fromMap([
+        "#########",
+        "#S...R###",
+        "#####.###",
+        "#####L.-#",
+        "#######-#",
+        "#G.X.B.n#",
+        "#######-#",
+        "#########"
+    ]),
+    
+    fromMap([
+        "##############",
+        "#S...........#",
+        "#..B...B.....#",
+        "#####v###v####",
+        "#####v###v####",
+        "#G.XX<<<<<<..#",
+        "##############"
+    ]),
+    
+    fromMap([
+        "##############",
+        "#S..x.y.x.y..#",
+        "#.B#########X#",
+        "#....y..x...X#",
+        "############G#",
+        "##############"
+    ]),
+    
+    fromMap([
+        "##############",
+        "#S..a#.a.....#",
+        "#....#....B..#",
+        "#....#.......#",
+        "######.#######",
+        "#G....X......#",
+        "##############"
+    ]),
+    
+    fromMap([
+        "############",
+        "#S.....#K..#",
+        "#..B.B.XX.D#",
+        "#......###G#",
+        "############"
+    ]),
+    
+    fromMap([
+        "##############",
+        "#S.x.y.a#a..K#",
+        "######D#######",
+        "###.........##",
+        "###...B~~~B.##",
+        "###R.......###",
+        "######-m-#####",
+        "######X#######",
+        "######>>>X.G.#",
+        "##############"
     ]),
 ];
-drawLevel(levelList[0]);
+drawLevel(levelList[level]);
+robot.x = levelList[level].start.x;
+robot.y = levelList[level].start.y;
+robot.dir = levelList[level].start.dir;
 drawRobot(0);
 
 function drawLevel(level) {
@@ -298,30 +407,75 @@ function drawLevel(level) {
     }
     tick = 0;
     movers = (level.movers || []).map(m => ({ ...m }));
+    boxes = (level.boxes || []).map(b => ({ ...b }));
     renderWorld();
 }
 
-// ---- moving walls & spikes ----
+
 function spikeUp(cell) {
     const s = cell && classWithPrefix(cell, "spike-");
     return !!s && (tick + Number(s.slice(6))) % 4 >= 2;
 }
 function renderWorld() {
     for (const c of grid.children) {
-        c.classList.remove("mover");
+        c.classList.remove("mover", "box");
         if (classWithPrefix(c, "spike-")) c.classList.toggle("up", spikeUp(c));
     }
     for (const m of movers) cellAt(m.x, m.y).classList.add("mover");
+    for (const b of boxes) cellAt(b.x, b.y).classList.add("box");
 }
 function moverCanEnter(x, y) {
     const c = cellAt(x, y);
     return !!c && c.classList.contains("track") &&
-        !movers.some(m => m.x === x && m.y === y) &&
+        !movers.some(m => m.x === x && m.y === y) && !boxAt(x, y) &&
         !(robot.x === x && robot.y === y);
 }
-// Advance the world one step. Movers bounce off track ends, other movers and the robot.
-function tickWorld() {
+
+
+function boxAt(x, y) {
+    return boxes.find(b => b.x === x && b.y === y) || null;
+}
+
+function boxCanEnter(x, y) {
+    const c = cellAt(x, y);
+    if (!c || isBlocked(x, y) || boxAt(x, y) || (robot.x === x && robot.y === y)) return false;
+    return !c.classList.contains("goal") && !c.classList.contains("key") && !classWithPrefix(c, "portal-");
+}
+
+async function resolveBox(b, dir, alive) {
+    for (let n = 0; n < 60 && alive(); n++) {
+        const cell = cellAt(b.x, b.y);
+        if (cell.classList.contains("pit")) {
+            cell.classList.replace("pit", "filled");
+            boxes.splice(boxes.indexOf(b), 1);
+            flash(cell, "sink", 400);
+            break;
+        }
+        const nx = b.x + DX[dir], ny = b.y + DY[dir];
+        if (!cell.classList.contains("ice") || !boxCanEnter(nx, ny)) break;
+        b.x = nx;
+        b.y = ny;
+        renderWorld();
+        await sleep(SLIDE_MS);
+    }
+    renderWorld();
+}
+async function pushBox(b, dir, alive) {
+    const nx = b.x + DX[dir], ny = b.y + DY[dir];
+    if (!boxCanEnter(nx, ny)) return false;
+    b.x = nx;
+    b.y = ny;
+    renderWorld();
+    await resolveBox(b, dir, alive);
+    return true;
+}
+
+async function tickWorld(alive) {
     tick++;
+    for (const b of [...boxes]) {           
+        const belt = classWithPrefix(cellAt(b.x, b.y), "belt-");
+        if (belt) await pushBox(b, Number(belt.slice(5)), alive);
+    }
     for (const m of movers) {
         for (let attempt = 0; attempt < 2; attempt++) {
             const nx = m.x + DX[m.dir], ny = m.y + DY[m.dir];
@@ -357,8 +511,8 @@ function resetRobot() {
 }
 function resetRobotExternal(){
     running = false;
-    activeRun++;            // stops any in-flight run
-    drawLevel(levelList[level]);   // restores keys/doors
+    activeRun++;            
+    drawLevel(levelList[level]);   
     resetRobot();
 }
 
@@ -372,14 +526,15 @@ function isBlocked(x, y) {
 }
 function flash(cell, cls, ms) {
     cell.classList.remove(cls);
-    void cell.offsetWidth;   // restart animation
+    void cell.offsetWidth;   
     cell.classList.add(cls);
     setTimeout(() => cell.classList.remove(cls), ms);
 }
-function tryMove(dir) {
+async function tryMove(dir, alive) {
     const nx = robot.x + DX[dir];
     const ny = robot.y + DY[dir];
-    if (isBlocked(nx, ny)) {
+    const b = boxAt(nx, ny);
+    if ((b && !(await pushBox(b, dir, alive))) || isBlocked(nx, ny)) {
         flash(cellAt(robot.x, robot.y), "hit", 250);
         return false;
     }
@@ -392,9 +547,9 @@ function classWithPrefix(cell, prefix) {
     return null;
 }
 
-// Apply the effect of the tile the robot just entered. Returns "ok", "goal" or "fail".
+
 async function resolveTile(alive) {
-    for (let n = 0; n < 60 && alive(); n++) {   // cap guards against belt loops
+    for (let n = 0; n < 60 && alive(); n++) {   
         const cell = cellAt(robot.x, robot.y);
         const cl = cell.classList;
         if (cl.contains("goal")) return "goal";
@@ -425,8 +580,8 @@ async function resolveTile(alive) {
         }
         const belt = classWithPrefix(cell, "belt-");
         let moved = false;
-        if (cl.contains("ice")) moved = tryMove(robot.dir);
-        else if (belt) moved = tryMove(Number(belt.slice(5)));
+        if (cl.contains("ice")) moved = await tryMove(robot.dir, alive);
+        else if (belt) moved = await tryMove(Number(belt.slice(5)), alive);
         if (!moved) return "ok";
         drawRobot();
         await sleep(SLIDE_MS);
@@ -444,7 +599,7 @@ async function runProgram() {
     const id = ++activeRun;
     const alive = () => running && id === activeRun;
 
-    drawLevel(levelList[level]);   // fresh keys/doors each run
+    drawLevel(levelList[level]);   
     resetRobot();
     await sleep(500);
 
@@ -455,7 +610,7 @@ async function runProgram() {
         code.setSelectionRange(i, i + 1);
         const c = commands[i];
         if (c === "f") {
-            if (tryMove(robot.dir)) {
+            if (await tryMove(robot.dir, alive)) {
                 drawRobot();
                 result = await resolveTile(alive);
             }
@@ -463,8 +618,8 @@ async function runProgram() {
             robot.dir = (robot.dir + 1) % 4;
         } else if (c === "l") {
             robot.dir = (robot.dir + 3) % 4;
-        }                                   // any other character = wait one step
-        if (result === "ok") result = tickWorld();
+        }                                   
+        if (result === "ok") result = await tickWorld(alive);
         drawRobot();
         if (result !== "ok") break;
         i = (i + 1) % commands.length;
@@ -499,8 +654,8 @@ function drawRobot() {
     cell.classList.add("robot");
     cell.dataset.dir = robot.dir;
 
-    let turn = (robot.dir - lastDir + 4) % 4;   // 0..3 quarter turns clockwise
-    if (turn === 3) turn = -1;                  // 3 right = 1 left
+    let turn = (robot.dir - lastDir + 4) % 4;   
+    if (turn === 3) turn = -1;                  
     robotAngle += turn * 90;
     lastDir = robot.dir;
     cell.style.setProperty("--angle", robotAngle + "deg");

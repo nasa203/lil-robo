@@ -1,15 +1,15 @@
 @import url("https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&family=JetBrains+Mono:wght@500&display=swap");
 
 :root {
-    --bg: #13283f;          /* blueprint navy */
+    --bg: #13283f;          
     --panel: #0c1c2e;
-    --plate: #1f4063;       /* floor plate */
+    --plate: #1f4063;       
     --plate-edge: #2c5680;
     --line: #4a7fb0;
     --text: #e4eefa;
     --muted: #8fb0cf;
-    --robot: #ff8a1f;       /* safety orange */
-    --goal: #f2c14e;        /* brass */
+    --robot: #ff8a1f;       
+    --goal: #f2c14e;        
     --ice: #bfe8ff;
     --key: #ffd257;
     --door: #8a4b26;
@@ -32,7 +32,7 @@ body {
     background: white;
 }
 
-/* ---------- board ---------- */
+
 #grid {
     display: grid;
     grid-template-columns: repeat(8, 60px);
@@ -53,7 +53,7 @@ body {
     background: var(--plate);
     box-shadow: inset 0 0 0 1px var(--plate-edge);
 }
-/* rivets on plain floor */
+
 .empty {
     background:
         radial-gradient(circle at 7px 7px, var(--plate-edge) 1.5px, transparent 2.5px),
@@ -87,7 +87,7 @@ body {
     box-shadow: inset 0 0 14px 6px #000;
 }
 
-/* tile icons live in ::before so the robot (::after) can sit on top */
+
 .key::before, .door::before, .belt-0::before, .belt-1::before, .belt-2::before, .belt-3::before,
 .spin-r::before, .spin-l::before, .portal-a::before, .portal-b::before {
     content: "";
@@ -133,7 +133,7 @@ body {
     display: none;
 }
 
-/* conveyor belts: moving stripes + chevron */
+
 .belt-0, .belt-2 {
     background: repeating-linear-gradient(90deg, #333f4f 0 10px, var(--belt) 10px 20px);
     animation: beltX .7s linear infinite;
@@ -158,7 +158,7 @@ body {
 .belt-2::before { transform: rotate(180deg); }
 .belt-3::before { transform: rotate(270deg); }
 
-/* spinners */
+
 .spin-r::before, .spin-l::before {
     width: 34px;
     height: 34px;
@@ -174,7 +174,7 @@ body {
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* portals */
+
 .portal-a::before, .portal-b::before {
     width: 42px;
     height: 42px;
@@ -195,14 +195,14 @@ body {
     100% { box-shadow: 0 0 0 14px transparent; }
 }
 
-/* moving-wall track: floor with rails */
+
 .track {
     background:
         linear-gradient(90deg, transparent 26px, #5d7fa3 26px 28px, transparent 28px 32px, #5d7fa3 32px 34px, transparent 34px),
         linear-gradient(transparent 26px, #5d7fa3 26px 28px, transparent 28px 32px, #5d7fa3 32px 34px, transparent 34px),
         var(--plate);
 }
-/* the moving wall itself: hazard-striped block */
+
 .track.mover {
     background:
         linear-gradient(160deg, rgba(255,255,255,.2), rgba(0,0,0,.25)),
@@ -214,7 +214,7 @@ body {
     from { transform: scale(.9); }
 }
 
-/* spikes: a row of blades that rise and retract */
+
 [class*="spike-"]::before {
     content: "";
     position: absolute;
@@ -235,7 +235,54 @@ body {
     transform: scaleY(1);
 }
 
-/* ---------- robot ---------- */
+
+.box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.box::after {
+    content: "";
+    position: relative;
+    z-index: 2;
+    width: 46px;
+    height: 46px;
+    border-radius: 4px;
+    background:
+        linear-gradient(45deg, transparent 45%, #7a4a1f 45% 55%, transparent 55%),
+        linear-gradient(-45deg, transparent 45%, #7a4a1f 45% 55%, transparent 55%),
+        linear-gradient(#d9a066, #b9793d);
+    box-shadow: inset 0 0 0 4px #7a4a1f, 0 3px 5px rgba(0,0,0,.35);
+}
+.box-display{
+    content: "";
+    position: relative;
+    z-index: 2;
+    width: 46px;
+    height: 46px;
+    border-radius: 4px;
+    background:
+        linear-gradient(45deg, transparent 45%, #7a4a1f 45% 55%, transparent 55%),
+        linear-gradient(-45deg, transparent 45%, #7a4a1f 45% 55%, transparent 55%),
+        linear-gradient(#d9a066, #b9793d);
+    box-shadow: inset 0 0 0 4px #7a4a1f, 0 3px 5px rgba(0,0,0,.35);
+}
+
+.filled {
+    background:
+        linear-gradient(45deg, transparent 46%, rgba(90,55,25,.6) 46% 54%, transparent 54%),
+        linear-gradient(#8f6239, #6e4626);
+    box-shadow: inset 0 0 10px 3px rgba(0,0,0,.45);
+}
+.sink {
+    animation: sink .4s ease-out;
+}
+@keyframes sink {
+    0%   { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+
 .robot {
     display: flex;
     align-items: center;
@@ -280,7 +327,7 @@ body {
     100% { transform: translateX(0); }
 }
 
-/* ---------- controls ---------- */
+
 .container {
     display: flex;
     gap: 40px;
