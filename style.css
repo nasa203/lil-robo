@@ -195,6 +195,46 @@ body {
     100% { box-shadow: 0 0 0 14px transparent; }
 }
 
+/* moving-wall track: floor with rails */
+.track {
+    background:
+        linear-gradient(90deg, transparent 26px, #5d7fa3 26px 28px, transparent 28px 32px, #5d7fa3 32px 34px, transparent 34px),
+        linear-gradient(transparent 26px, #5d7fa3 26px 28px, transparent 28px 32px, #5d7fa3 32px 34px, transparent 34px),
+        var(--plate);
+}
+/* the moving wall itself: hazard-striped block */
+.track.mover {
+    background:
+        linear-gradient(160deg, rgba(255,255,255,.2), rgba(0,0,0,.25)),
+        repeating-linear-gradient(45deg, #f2c14e 0 8px, #2b2b2b 8px 16px);
+    box-shadow: inset 0 0 0 3px #2b2b2b, 0 3px 6px rgba(0,0,0,.4);
+    animation: moverPop .25s ease-out;
+}
+@keyframes moverPop {
+    from { transform: scale(.9); }
+}
+
+/* spikes: a row of blades that rise and retract */
+[class*="spike-"]::before {
+    content: "";
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    bottom: 10px;
+    height: 34px;
+    background: linear-gradient(#f4f6f8, #8c97a3);
+    clip-path: polygon(0 100%, 12.5% 0, 25% 100%, 37.5% 0, 50% 100%, 62.5% 0, 75% 100%, 87.5% 0, 100% 100%);
+    transform: scaleY(.12);
+    transform-origin: bottom;
+    transition: transform .15s ease;
+}
+[class*="spike-"].up {
+    background: radial-gradient(circle, rgba(255, 70, 70, .35), var(--plate) 75%);
+}
+[class*="spike-"].up::before {
+    transform: scaleY(1);
+}
+
 /* ---------- robot ---------- */
 .robot {
     display: flex;

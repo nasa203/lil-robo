@@ -11,6 +11,8 @@ let robot = {
 };
 let running = false;
 let activeRun = 0;
+let tick = 0;        // world clock: advances once per program step
+let movers = [];      // live moving-wall positions
 let robotAngle = 0;   // cumulative rotation so turns always take the short way
 let lastDir = 0;
 let level = 0;
@@ -20,15 +22,20 @@ const TILES = {
     "#": "wall", ".": "empty", "S": "empty", "G": "goal",
     "~": "ice", "X": "pit", "K": "key", "D": "door",
     ">": "belt-0", "v": "belt-1", "<": "belt-2", "^": "belt-3",
-    "R": "spin-r", "L": "spin-l", "a": "portal-a", "b": "portal-b"
+    "R": "spin-r", "L": "spin-l", "a": "portal-a", "b": "portal-b",
+    "-": "track", "m": "track", "n": "track",   // m/n = moving wall starting horizontal/vertical
+    "x": "spike-0", "y": "spike-2"              // spikes: up 2 steps, down 2 steps (y is offset)
 };
 function fromMap(rows, dir = 0) {
     let start = null;
+    const movers = [];
     const cells = rows.map((row, y) => [...row].map((ch, x) => {
         if (ch === "S") start = { x, y, dir };
+        if (ch === "m") movers.push({ x, y, dir: 0 });
+        if (ch === "n") movers.push({ x, y, dir: 1 });
         return TILES[ch];
     }));
-    return { width: rows[0].length, height: rows.length, grid: cells, start };
+    return { width: rows[0].length, height: rows.length, grid: cells, start, movers };
 }
 
 const levelList = [
@@ -128,7 +135,7 @@ const levelList = [
         "#....#...#",
         "##########"
     ]),
-    // 8 — Conveyor belts carry you along
+    // 8 — Conveyor belts 
     fromMap([
         "###########",
         "#S........#",
@@ -137,7 +144,7 @@ const levelList = [
         "#G<<<<<<<.#",
         "###########"
     ]),
-    // 9 — Spinners turn you (R = right, L = left)
+    // 9 — Spinners turn you 
     fromMap([
         "#########",
         "#S..R#RG#",
@@ -145,7 +152,7 @@ const levelList = [
         "####L.L##",
         "#########"
     ]),
-    // 10 — Portals: step in one, come out of its twin
+    // 10 — Portals
     fromMap([
         "##########",
         "#S..a#..G#",
@@ -170,6 +177,123 @@ const levelList = [
         "##.GD<<<<<#",
         "###########"
     ]),
+    // 13 — Spike Gallery
+    fromMap([
+        "##############",
+        "#S..x.y.x...K#",
+        "#.##########.#",
+        "#.#G.......#.#",
+        "#.#####.####.#",
+        "#...y.xD.....#",
+        "##############"
+    ]),
+    // 14 — Patrol
+    fromMap([
+        "##############",
+        "#S....-......#",
+        "#####.-.####.#",
+        "#G..#.n.#..x.#",
+        "##.##.-.#.##.#",
+        "#..<<<-....y.#",
+        "##############"
+    ]),
+    // 15 — Slippery Slope
+    fromMap([
+        "##############",
+        "#S~~~~~R~~~~.#",
+        "#######~######",
+        "#X~~~~~L~~~~.#",
+        "#~####-#####.#",
+        "#~~~~~n~~~~x.#",
+        "#~####-#####.#",
+        "#G...y-..x...#",
+        "##############"
+    ]),
+    // 16 — Portal Maze
+    fromMap([
+        "##############",
+        "#S..#a...X..b#",
+        "#.#.#.##.#.#.#",
+        "#.#...#..y.#.#",
+        "#.####.#####.#",
+        "#b..x....>>>v#",
+        "#####.######v#",
+        "#G..a.y.....<#",
+        "##############"
+    ]),
+    // 17 — Frozen Lake
+    fromMap([
+        "##############",
+        "#S~~~.~~~~#~a#",
+        "#~~X~~~X~~~~~#",
+        "#.~~~#~~~~X~.#",
+        "#~X~~~~.~~~~~#",
+        "#~~~~X~~#~~~.#",
+        "##############",
+        "#a..y..x..y.G#",
+        "##############"
+    ]),
+    // 18 — Crossfire
+    fromMap([
+        "##############",
+        "#S.-.-.-.-..x#",
+        "#..n.-.-.n..y#",
+        "#..-.n.-.-..x#",
+        "#..-.-.n.-..y#",
+        "#..-.-.-.-..b#",
+        "##############",
+        "#b..y.~~x...G#",
+        "##############"
+    ]),
+    // 19 — Conveyor Factory
+    fromMap([
+        "##############",
+        "#S>>>>v#K....#",
+        "#.....v#.###.#",
+        "#.###.v#.-m-.#",
+        "#.#G#.>>>>>v.#",
+        "#.#D#.....v..#",
+        "#.#.######v###",
+        "#...y..x..<..#",
+        "##############"
+    ]),
+    // 20 — Clockwork
+    fromMap([
+        "##############",
+        "#S....R.....L#",
+        "#.###.#.###.##",
+        "#.#K#.-.#G#.##",
+        "#.#.#.n.#D#.##",
+        "#.#.#.-.#.#.##",
+        "#...#.-.....##",
+        "##############"
+    ]),
+    // 21 — Gauntlet
+    fromMap([
+        "##############",
+        "#S.x..y..x.K.#",
+        "############.#",
+        "#G...-..a###D#",
+        "#####n###v<<<#",
+        "#.~~~#~~~~~..#",
+        "#.~X~~X~~~~X.#",
+        "#.~~~~~R~~~~.#",
+        "#a....X......#",
+        "##############"
+    ]),
+    // 22 — Finale
+    fromMap([
+        "##############",
+        "#S~~~R#..x..K#",
+        "#.##~.#.###..#",
+        "#.#X~~-m---..#",
+        "#.#~~L#.###.y#",
+        "#.#a###.#G#..#",
+        "#.#.....#D#>v#",
+        "#.#####.#.#.v#",
+        "#b......y...<#",
+        "##############"
+    ]),
 ];
 drawLevel(levelList[0]);
 drawRobot(0);
@@ -188,6 +312,41 @@ function drawLevel(level) {
             grid.appendChild(cell);
         }
     }
+    tick = 0;
+    movers = (level.movers || []).map(m => ({ ...m }));
+    renderWorld();
+}
+
+// ---- moving walls & spikes ----
+function spikeUp(cell) {
+    const s = cell && classWithPrefix(cell, "spike-");
+    return !!s && (tick + Number(s.slice(6))) % 4 >= 2;
+}
+function renderWorld() {
+    for (const c of grid.children) {
+        c.classList.remove("mover");
+        if (classWithPrefix(c, "spike-")) c.classList.toggle("up", spikeUp(c));
+    }
+    for (const m of movers) cellAt(m.x, m.y).classList.add("mover");
+}
+function moverCanEnter(x, y) {
+    const c = cellAt(x, y);
+    return !!c && c.classList.contains("track") &&
+        !movers.some(m => m.x === x && m.y === y) &&
+        !(robot.x === x && robot.y === y);
+}
+// Advance the world one step. Movers bounce off track ends, other movers and the robot.
+function tickWorld() {
+    tick++;
+    for (const m of movers) {
+        for (let attempt = 0; attempt < 2; attempt++) {
+            const nx = m.x + DX[m.dir], ny = m.y + DY[m.dir];
+            if (moverCanEnter(nx, ny)) { m.x = nx; m.y = ny; break; }
+            if (attempt === 0) m.dir = (m.dir + 2) % 4;
+        }
+    }
+    renderWorld();
+    return spikeUp(cellAt(robot.x, robot.y)) ? "fail" : "ok";
 }
 
 function cycleLevel() {
@@ -224,7 +383,7 @@ function cellAt(x, y) {
 }
 function isBlocked(x, y) {
     const c = cellAt(x, y);
-    return !c || c.classList.contains("wall") ||
+    return !c || c.classList.contains("wall") || c.classList.contains("mover") ||
         (c.classList.contains("door") && !c.classList.contains("open"));
 }
 function flash(cell, cls, ms) {
@@ -256,6 +415,7 @@ async function resolveTile(alive) {
         const cl = cell.classList;
         if (cl.contains("goal")) return "goal";
         if (cl.contains("pit")) return "fail";
+        if (classWithPrefix(cell, "spike-")) return spikeUp(cell) ? "fail" : "ok";
         if (cl.contains("key")) {
             cl.replace("key", "empty");
             for (const c of grid.children) {
@@ -319,7 +479,8 @@ async function runProgram() {
             robot.dir = (robot.dir + 1) % 4;
         } else if (c === "l") {
             robot.dir = (robot.dir + 3) % 4;
-        }
+        }                                   // any other character = wait one step
+        if (result === "ok") result = tickWorld();
         drawRobot();
         if (result !== "ok") break;
         i = (i + 1) % commands.length;

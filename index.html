@@ -9,12 +9,12 @@
             <div id="grid"></div>
 
             <div id="prog" class="child">
-                <textarea id="code" spellcheck="false">f f r f</textarea>
+                <textarea id="code" spellcheck="false">ffrf</textarea>
                 <div class="container">
                     <button class="button run" onclick="runProgram()">Run</button>
                     <button class="button" onclick="resetRobotExternal()">Reset</button>
                 </div>
-                <p class="hint"><b>f</b> forward, <b>r</b> turn right, <b>l</b> turn left. Your program repeats until the robot reaches the goal.</p>
+                <p class="hint"><b>f</b> forward, <b>r</b> turn right, <b>l</b> turn left. Any other character (like a space) waits one step. Your program repeats until the robot reaches the goal.</p>
                 <div class="legend">
                     <div><span class="cell goal"></span>Goal</div>
                     <div><span class="cell wall"></span>Wall</div>
@@ -25,6 +25,8 @@
                     <div><span class="cell belt-0"></span>Belt: carries you</div>
                     <div><span class="cell spin-r"></span>Spinner: turns you</div>
                     <div><span class="cell portal-a"></span>Portal: jump to its twin</div>
+                    <div><span class="cell spike-0 up"></span>Spikes: up 2 steps, down 2</div>
+                    <div><span class="cell track mover"></span>Moving wall: bounces along its rails</div>
                 </div>
             </div>
         </div>
