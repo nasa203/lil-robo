@@ -211,10 +211,7 @@ body {
     clip-path: polygon(100% 50%, 0% 0%, 22% 50%, 0% 100%);
     transition: transform .2s ease;
 }
-.robot[data-dir="0"]::after { transform: rotate(0deg); }
-.robot[data-dir="1"]::after { transform: rotate(90deg); }
-.robot[data-dir="2"]::after { transform: rotate(180deg); }
-.robot[data-dir="3"]::after { transform: rotate(270deg); }
+.robot::after { transform: rotate(var(--angle, 0deg)); }
 
 .robot.fall::after {
     animation: fall .6s ease-in forwards;

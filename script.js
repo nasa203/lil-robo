@@ -11,8 +11,10 @@ let robot = {
 };
 let running = false;
 let activeRun = 0;
+let robotAngle = 0;   // cumulative rotation so turns always take the short way
+let lastDir = 0;
 let level = 0;
- 
+
 // Map characters for compact level definitions (produces the same format as the hand-written levels)
 const TILES = {
     "#": "wall", ".": "empty", "S": "empty", "G": "goal",
@@ -28,7 +30,7 @@ function fromMap(rows, dir = 0) {
     }));
     return { width: rows[0].length, height: rows.length, grid: cells, start };
 }
- 
+
 const levelList = [
     {
         width:7,
@@ -83,7 +85,7 @@ const levelList = [
     {
         width: 10,
         height: 7,
- 
+
         grid: [
             ["wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall"],
             ["wall", "empty", "empty", "empty", "empty", "empty", "empty", "empty", "goal", "wall"],
@@ -93,7 +95,7 @@ const levelList = [
             ["wall", "empty", "empty", "empty", "empty", "empty", "empty", "empty", "empty", "wall"],
             ["wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall"]
         ],
- 
+
         start: {
             x: 1,
             y: 5,
@@ -171,7 +173,7 @@ const levelList = [
 ];
 drawLevel(levelList[0]);
 drawRobot(0);
- 
+
 function drawLevel(level) {
     grid.innerHTML = "";
     grid.style.gridTemplateColumns = `repeat(${level.width}, 60px)`;
@@ -187,7 +189,7 @@ function drawLevel(level) {
         }
     }
 }
- 
+
 function cycleLevel() {
     running = false;
     activeRun++;
@@ -205,7 +207,9 @@ function resetRobot() {
     robot.x = start.x;
     robot.y = start.y;
     robot.dir = start.dir;
- 
+    robotAngle = start.dir * 90;
+    lastDir = start.dir;
+
     drawRobot();
 }
 function resetRobotExternal(){
@@ -214,7 +218,7 @@ function resetRobotExternal(){
     drawLevel(levelList[level]);   // restores keys/doors
     resetRobot();
 }
- 
+
 function cellAt(x, y) {
     return grid.querySelector(`[data-x="${x}"][data-y="${y}"]`);
 }
@@ -244,7 +248,7 @@ function classWithPrefix(cell, prefix) {
     for (const c of cell.classList) if (c.startsWith(prefix)) return c;
     return null;
 }
- 
+
 // Apply the effect of the tile the robot just entered. Returns "ok", "goal" or "fail".
 async function resolveTile(alive) {
     for (let n = 0; n < 60 && alive(); n++) {   // cap guards against belt loops
@@ -285,21 +289,21 @@ async function resolveTile(alive) {
     }
     return "ok";
 }
- 
+
 async function runProgram() {
     if (running) return;
     const code = document.getElementById("code");
     const commands = code.value.toLowerCase();
     if (!/[frl]/.test(commands)) return;
- 
+
     running = true;
     const id = ++activeRun;
     const alive = () => running && id === activeRun;
- 
+
     drawLevel(levelList[level]);   // fresh keys/doors each run
     resetRobot();
     await sleep(500);
- 
+
     let i = 0;
     let result = "ok";
     while (alive()) {
@@ -322,7 +326,7 @@ async function runProgram() {
         await sleep(STEP_MS);
     }
     if (!alive()) return;
- 
+
     const currentCell = cellAt(robot.x, robot.y);
     if (result === "goal") {
         currentCell.classList.add("complete");
@@ -349,5 +353,10 @@ function drawRobot() {
     const cell = cellAt(robot.x, robot.y);
     cell.classList.add("robot");
     cell.dataset.dir = robot.dir;
+
+    let turn = (robot.dir - lastDir + 4) % 4;   // 0..3 quarter turns clockwise
+    if (turn === 3) turn = -1;                  // 3 right = 1 left
+    robotAngle += turn * 90;
+    lastDir = robot.dir;
+    cell.style.setProperty("--angle", robotAngle + "deg");
 }
- 
