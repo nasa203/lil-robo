@@ -1,20 +1,30 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <meta charset="utf-8">
         <link rel="stylesheet" href="style.css">
     </head>
     <body>
         <div class="container">
-            <div id="grid"><!--
-                <div class="cell wall"></div>
-                <div class="cell goal"></div>-->
-            </div>
+            <div id="grid"></div>
 
             <div id="prog" class="child">
                 <textarea id="code" spellcheck="false">f f r f</textarea>
                 <div class="container">
-                    <button class="button" onclick="runProgram()">Run</button>
+                    <button class="button run" onclick="runProgram()">Run</button>
                     <button class="button" onclick="resetRobotExternal()">Reset</button>
+                </div>
+                <p class="hint"><b>f</b> forward, <b>r</b> turn right, <b>l</b> turn left. Your program repeats until the robot reaches the goal.</p>
+                <div class="legend">
+                    <div><span class="cell goal"></span>Goal</div>
+                    <div><span class="cell wall"></span>Wall</div>
+                    <div><span class="cell ice"></span>Ice: slide until stopped</div>
+                    <div><span class="cell pit"></span>Pit: restarts the run</div>
+                    <div><span class="cell key"></span>Key: opens doors</div>
+                    <div><span class="cell door"></span>Door</div>
+                    <div><span class="cell belt-0"></span>Belt: carries you</div>
+                    <div><span class="cell spin-r"></span>Spinner: turns you</div>
+                    <div><span class="cell portal-a"></span>Portal: jump to its twin</div>
                 </div>
             </div>
         </div>
@@ -22,7 +32,6 @@
             <button class="button" onclick="cycleLevel()">Next Level</button>
             <p class="text" id="level">Level 1</p>
         </div>
-        </center>
     </body>
     <script src="script.js"></script>
 </html>
