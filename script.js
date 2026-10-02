@@ -72,17 +72,26 @@ const levelList = [
             dir: 0
         }
     },
+
+    // 4 — Ice: you slide until you hit something that isn't ice
+    fromMap([
+        "########",
+        "#S~~~~.#",
+        "#####~.#",
+        "#G~~~~.#",
+        "########"
+    ]),
     {
         width: 10,
         height: 7,
 
         grid: [
             ["wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall"],
-            ["wall", "empty", "empty", "empty", "empty", "empty", "empty", "empty", "goal", "wall"],
-            ["wall", "empty", "empty", "wall", "wall", "wall", "wall", "empty", "empty", "wall"],
-            ["wall", "empty", "empty", "empty", "empty", "empty", "empty", "empty", "empty", "wall"],
-            ["wall", "empty", "empty", "wall", "wall", "wall", "wall", "empty", "empty", "wall"],
-            ["wall", "empty", "empty", "empty", "empty", "empty", "empty", "empty", "empty", "wall"],
+            ["wall", "wall", "ice", "ice", "ice", "ice", "ice", "ice", "goal", "wall"],
+            ["wall", "ice", "ice", "wall", "wall", "wall", "wall", "ice", "ice", "wall"],
+            ["wall", "ice", "ice", "ice", "ice", "ice", "ice", "ice", "ice", "wall"],
+            ["wall", "ice", "wall", "wall", "wall", "wall", "wall", "ice", "wall", "wall"],
+            ["wall", "ice", "ice", "ice", "ice", "ice", "ice", "ice", "ice", "wall"],
             ["wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall"]
         ],
 
@@ -92,14 +101,6 @@ const levelList = [
             dir: 0
         }
     },
-    // 5 — Ice: you slide until you hit something that isn't ice
-    fromMap([
-        "########",
-        "#S~~~~.#",
-        "#####~.#",
-        "#G~~~~.#",
-        "########"
-    ]),
     // 6 — Pits: falling in restarts the run
     fromMap([
         "#########",
